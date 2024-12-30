@@ -139,14 +139,15 @@ class AABase_3(AABase):
         A_opt_ = torch.asarray(A, requires_grad=True)
         optimizer_A = self.optimizer(params=[A_opt_], **self.optimizer_kwargs)
 
-        losses = []
+        loss = self.calc_rss(A, X)
+        losses = [loss]
         for i in range(self.max_iter):
-            loss = self.calc_rss(A, X)
-            losses.append(loss.item())
-
             optimizer_A.zero_grad()
             loss.backward(retain_graph=True)
             optimizer_A.step()
+
+            loss = self.calc_rss(A, X)
+            losses.append(loss.item())
 
             A = torch.softmax(A_opt_, dim=1)
         
