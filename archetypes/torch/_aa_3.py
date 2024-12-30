@@ -122,6 +122,38 @@ class AABase_3(AABase):
 
     def transform(self, X):
         return self._optim_A(X).cpu().detach()
+    
+    def calc_rss(self, coefficients, X):
+        X_hat = coefficients @ self.archetypes_
+        return torch.linalg.norm(X - X_hat) ** 2
+    
+    def transform_new(self, X):
+        '''
+        Transform new data (new coefficients need to be calculated).
+        Ideally, should replace transform() fn in a way that doesn't break
+        original code, but I don't feel like fiddling around with that right now.
+        '''
+        optimizer = self.method_kwargs.get("optimizer", "SGD")
+
+        A = self._init_A(X)
+        A_opt_ = torch.asarray(A, requires_grad=True)
+        optimizer_A = optimizer(params=[A_opt_], **self.optimizer_kwargs)
+
+        losses = []
+        for i in range(self.max_iter):
+            loss = self.calc_rss(A, X)
+            losses.append(loss.item())
+
+            optimizer_A.zero_grad()
+            loss.backward(retain_graph=True)
+            optimizer_A.step()
+
+            A = torch.softmax(A_opt_, dim=1)
+        
+            if abs(losses[-1] - losses[-2]) < self.tol:
+                break
+            
+        return A
 
     def fit_transform(self, X, y=None, **fit_params):
         return self.fit(X, y, **fit_params).transform(X)
