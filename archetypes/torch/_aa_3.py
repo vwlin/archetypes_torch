@@ -133,11 +133,11 @@ class AABase_3(AABase):
         Ideally, should replace transform() fn in a way that doesn't break
         original code, but I don't feel like fiddling around with that right now.
         '''
-        optimizer = self.method_kwargs.get("optimizer", "SGD")
+        # optimizer = self.method_kwargs.get("optimizer", "SGD")
 
         A = self._init_A(X)
         A_opt_ = torch.asarray(A, requires_grad=True)
-        optimizer_A = optimizer(params=[A_opt_], **self.optimizer_kwargs)
+        optimizer_A = self.optimizer(params=[A_opt_], **self.optimizer_kwargs)
 
         losses = []
         for i in range(self.max_iter):
@@ -152,7 +152,7 @@ class AABase_3(AABase):
         
             if abs(losses[-1] - losses[-2]) < self.tol:
                 break
-            
+
         return A
 
     def fit_transform(self, X, y=None, **fit_params):
