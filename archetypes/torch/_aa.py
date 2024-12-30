@@ -77,6 +77,16 @@ class AA(AABase):
         # X = self._validate_data(X, dtype=[torch.float64, torch.float32])
 
         return self.method_class.transform(X)
+    
+    def transform_new(self, X):
+        if self.method not in ["autogd"]:
+            raise NotImplementedError
+        
+        check_is_fitted(self)
+        X = self._check_data(X)
+        # X = self._validate_data(X, dtype=[torch.float64, torch.float32])
+
+        return self.method_class.transform_new(X)
 
     def fit_transform(self, X, y=None, **fit_params):
         return self.fit(X, y, **fit_params).transform(X)
