@@ -1,4 +1,4 @@
-from archetypes.torch import AA, BiAA
+from archetypes.numpy import AA, BiAA
 
 __all__ = ["AA", "BiAA"]
 
